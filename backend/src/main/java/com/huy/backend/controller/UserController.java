@@ -12,10 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.huy.backend.dto.reponse.ApiReponse;
 import com.huy.backend.dto.request.UserCreationRequest;
 import com.huy.backend.dto.request.UserUpdateRequest;
 import com.huy.backend.entity.User;
 import com.huy.backend.service.impl.UserServiceImpl;
+
+import jakarta.validation.Valid;
 
 
 @RestController
@@ -25,8 +28,13 @@ public class UserController {
     private  UserServiceImpl userService;
 
     @PostMapping("/add")
-    User createUser(@RequestBody UserCreationRequest request) {
-        return userService.createUser(request);
+    ApiReponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiReponse<User> apiReponse = new ApiReponse<>();
+        
+        apiReponse.setMessage("User created successfully.");
+        apiReponse.setResult(userService.createUser(request));
+        return apiReponse;
+        
     }
     @GetMapping("/all")
     List<User> getAllUsers() {
@@ -49,4 +57,5 @@ public class UserController {
         userService.deleteUser(userID);
         return "User deleted successfully.";
     }    
+    
 }

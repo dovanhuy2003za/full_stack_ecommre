@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import com.huy.backend.dto.request.UserCreationRequest;
 import com.huy.backend.dto.request.UserUpdateRequest;
 import com.huy.backend.entity.User;
+import com.huy.backend.exception.AppException;
+import com.huy.backend.exception.ErrorCode;
 import com.huy.backend.repository.UserRepository;
 import com.huy.backend.service.UserService;
 
@@ -19,6 +21,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public User createUser(UserCreationRequest userCreationRequest) {
        User user = new User();
+        if (userRepository.existsByUsername(userCreationRequest.getUsername())) {
+            
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
         user.setUsername(userCreationRequest.getUsername());
         user.setPassword(userCreationRequest.getPassword());
         user.setEmail(userCreationRequest.getEmail());
@@ -44,12 +50,13 @@ public class UserServiceImpl implements UserService {
     public User getUserById(String userID) {
         
         return userRepository.findById(userID)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userID));
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
     @Override
     public User updateUser(String userID, UserUpdateRequest userUpdateRequest) {
         User user = getUserById(userID);
+        
         user.setPassword(userUpdateRequest.getPassword());
         user.setEmail(userUpdateRequest.getEmail());
         user.setFirstName(userUpdateRequest.getFirstName());
