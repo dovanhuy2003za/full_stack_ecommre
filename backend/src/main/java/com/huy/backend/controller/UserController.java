@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.huy.backend.dto.reponse.ApiReponse;
+import com.huy.backend.dto.reponse.UserResponse;
 import com.huy.backend.dto.request.UserCreationRequest;
 import com.huy.backend.dto.request.UserUpdateRequest;
 import com.huy.backend.entity.User;
@@ -45,11 +46,11 @@ public class UserController {
         return userService.getUserByuserName(username);
     }   
     @GetMapping("/{userID}")
-    User getUserById(@PathVariable("userID") String userID) {
+    UserResponse getUserById(@PathVariable("userID") String userID) {
         return userService.getUserById(userID);
     }
     @PutMapping("/{userID}")
-    User update(@PathVariable String userID, @RequestBody UserUpdateRequest request) {
+    UserResponse update(@PathVariable String userID, @RequestBody UserUpdateRequest request) {
         return userService.updateUser(userID, request);
     }
     @DeleteMapping("/{userID}")

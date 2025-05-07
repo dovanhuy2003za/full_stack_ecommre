@@ -5,11 +5,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.huy.backend.dto.reponse.UserResponse;
 import com.huy.backend.dto.request.UserCreationRequest;
 import com.huy.backend.dto.request.UserUpdateRequest;
 import com.huy.backend.entity.User;
 import com.huy.backend.exception.AppException;
 import com.huy.backend.exception.ErrorCode;
+import com.huy.backend.mapper.UserMapper;
 import com.huy.backend.repository.UserRepository;
 import com.huy.backend.service.UserService;
 
@@ -17,22 +19,16 @@ import com.huy.backend.service.UserService;
 public class UserServiceImpl implements UserService {
     @Autowired
     private UserRepository userRepository;
-
+    @Autowired
+    private UserMapper userMapper;
     @Override
     public User createUser(UserCreationRequest userCreationRequest) {
-       User user = new User();
+       
         if (userRepository.existsByUsername(userCreationRequest.getUsername())) {
             
             throw new AppException(ErrorCode.USER_EXISTED);
         }
-        user.setUsername(userCreationRequest.getUsername());
-        user.setPassword(userCreationRequest.getPassword());
-        user.setEmail(userCreationRequest.getEmail());
-        user.setFirstName(userCreationRequest.getFirstName());
-        user.setLastName(userCreationRequest.getLastName());
-        user.setDateOfBirth(userCreationRequest.getDateOfBirth());
-        user.setAddress(userCreationRequest.getAddress());
-
+        User user = userMapper.toUser(userCreationRequest);
         return userRepository.save(user);
     }
 
@@ -47,25 +43,21 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
-    public User getUserById(String userID) {
+    public UserResponse getUserById(String userID) {
         
-        return userRepository.findById(userID)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toUserResponse(userRepository.findById(userID)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED)));
     }
 
     @Override
-    public User updateUser(String userID, UserUpdateRequest userUpdateRequest) {
-        User user = getUserById(userID);
+    public UserResponse updateUser(String userID, UserUpdateRequest userUpdateRequest) {
+        User user = userRepository.findById(userID)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         
-        user.setPassword(userUpdateRequest.getPassword());
-        user.setEmail(userUpdateRequest.getEmail());
-        user.setFirstName(userUpdateRequest.getFirstName());
-        user.setLastName(userUpdateRequest.getLastName());
-        user.setDateOfBirth(userUpdateRequest.getDateOfBirth());
-        user.setAddress(userUpdateRequest.getAddress());
+        userMapper.updateUser(user, userUpdateRequest);
 
 
-        return userRepository.save(user);
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
     @Override
